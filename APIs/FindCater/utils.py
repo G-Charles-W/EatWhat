@@ -3,7 +3,9 @@ import urllib
 import hashlib
 import pandas as pd
 from .models import Restaurant, Dish
-
+import random
+import os
+from django.conf import settings
 
 class BaiduMapConfig:
 
@@ -112,6 +114,24 @@ def return_image(lat, lng, radius=1):
             resturant_data['dishes'].append(dish_data)
         data.append(resturant_data)
     return data
+
+
+def random_dish(request, latitude, longitude):
+    # 根据提供的经纬度坐标随机选择一家店铺
+    restaurants = Restaurant.objects.all()
+    random_restaurant = random.choice(restaurants)
+    print(f'random_restaurant:{random_restaurant}')
+
+    # 获取该店铺的所有菜品
+    dishes = Dish.objects.filter(Restaurant=random_restaurant)
+    if not dishes.exists():
+        return None
+
+        # 从店铺里面随机选择一道菜名
+    random_dish = random.choice(dishes)
+
+    print(f'random_dish:{random_dish}')
+    return os.path.join(settings.BASE_DIR, random_dish.image.name)
 
 
 if __name__ == '__main__':
