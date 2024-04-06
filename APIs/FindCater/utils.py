@@ -2,6 +2,7 @@ import requests
 import urllib
 import hashlib
 import pandas as pd
+from .models import Restaurant, Dish
 
 
 class BaiduMapConfig:
@@ -89,9 +90,34 @@ def get_nearby_cater(lat_=31.23, lgt_=121.539):
     return df
 
 
+def return_image(lat, lng, radius=1):
+    lat_min = lat - radius
+    lat_max = lat + radius
+    lng_max = lng + radius
+    lng_min = lng - radius
+    resturants = Restaurant.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max)
+    data = []
+    for resturant in resturants:
+        resturant_data = {
+            'name': resturant.name,
+            'latitude': resturant.latitude,
+            'longtitude': resturant.longitude,
+            'dishes': []
+        }
+        for dish in resturant.dish_set.all():
+            dish_data = {
+                'name': dish.name,
+                'image_url': dish.image.url
+            }
+            resturant_data['dishes'].append(dish_data)
+        data.append(resturant_data)
+    return data
+
+
 if __name__ == '__main__':
     # get_nearby_cater()
     df = pd.read_csv(r'D:\Projects\EatWhat\APIs\BaiduLocation\NearbyCater.csv')
     import numpy as np
+
     choice = np.random.choice(len(df), 1)
     breakpoint()
